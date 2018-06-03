@@ -22,9 +22,6 @@ for line in fhr:
     amazonBooks[ASIN] = MetaData
 fhr.close()
 
-# Read the data from amazon-books-copurchase.adjlist;
-# assign it to copurchaseGraph weighted Graph;
-# node = ASIN, edge= copurchase, edge weight = category similarity
 fhr=open("amazon-books-copurchase.edgelist", 'rb')
 copurchaseGraph=networkx.read_weighted_edgelist(fhr)
 fhr.close()
