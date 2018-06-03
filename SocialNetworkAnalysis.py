@@ -1,8 +1,7 @@
 import networkx
 from operator import itemgetter
 
-# Read the data from the amazon-books.txt;
-# populate amazonProducts nested dicitonary;
+
 # key = ASIN; value = MetaData associated with ASIN
 fhr = open('./amazon-books.txt', 'r', encoding='utf-8', errors='ignore')
 amazonBooks = {}
@@ -30,9 +29,7 @@ fhr=open("amazon-books-copurchase.edgelist", 'rb')
 copurchaseGraph=networkx.read_weighted_edgelist(fhr)
 fhr.close()
 
-# Now let's assume a person is considering buying the following book;
-# what else can we recommend to them based on copurchase behavior 
-# we've seen from other users?
+
 print ("Looking for Recommendations for Customer Purchasing this Book:")
 print ("--------------------------------------------------------------")
 purchasedAsin = '0805047905'
@@ -46,14 +43,8 @@ print ("AvgRating = ", amazonBooks[purchasedAsin]['AvgRating'])
 print ("DegreeCentrality = ", amazonBooks[purchasedAsin]['DegreeCentrality'])
 print ("ClusteringCoeff = ", amazonBooks[purchasedAsin]['ClusteringCoeff'])
     
-# Now let's look at the ego network associated with purchasedAsin in the
-# copurchaseGraph - which is esentially comprised of all the books 
-# that have been copurchased with this book in the past
+
 purchasedAsinEgoGraph = networkx.ego_graph(copurchaseGraph,purchasedAsin,radius=1)
-# Next, recall that the edge weights in the copurchaseGraph is a measure of
-# the similarity between the books connected by the edge. So we can use the 
-# island method to only retain those books that are highly simialr to the 
-# purchasedAsin
 threshold = 0.5
 purchasedAsinEgoTrimGraph = networkx.Graph()
 weightNodeList=[]
@@ -63,26 +54,16 @@ for frm, to, edge in purchasedAsinEgoGraph.edges(data=True):
         if(frm==purchasedAsin):
             weightNodeList.append([to,edge['weight']])
 weightNodeList=sorted(weightNodeList, key = itemgetter(0))
-# Next, recall that given the purchasedAsinEgoTrimGraph you constructed above, 
-# you can get at the list of nodes connected to the purchasedAsin by a single 
-# hop (called the neighbors of the purchasedAsin) 
 purchasedAsinNeighbors = []
 purchasedAsinNeighbors = purchasedAsinEgoTrimGraph.neighbors(purchasedAsin)
 purchasedAsinNeighbors = sorted(purchasedAsinNeighbors)
-# Next, let's pick the Top Five book recommendations from among the 
-# purchasedAsinNeighbors based on one or more of the following data of the 
-# neighboring nodes: SalesRank, AvgRating, TotalReviews, DegreeCentrality, 
-# and ClusteringCoeff
 compositeRating =[]
 for i in purchasedAsinNeighbors:
     for j in weightNodeList:
         if(j[0]==i):
             compositeRating.append([i,j[1]*j[1]*amazonBooks[i]['AvgRating']*amazonBooks[i]['DegreeCentrality']/((amazonBooks[i]['ClusteringCoeff'])+1)/2])
 compositeRating=sorted(compositeRating,key=itemgetter(1),reverse=True)[:5]
-
-# Print Top 5 recommendations (ASIN, and associated Title, Sales Rank, 
-# TotalReviews, AvgRating, DegreeCentrality, ClusteringCoeff)
-# (5) YOUR CODE HERE:  
+ 
 print()
 print("The top 5 recommendations are:")
  
